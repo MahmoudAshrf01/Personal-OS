@@ -5,7 +5,12 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export function ThemeToggle({ className }: { className?: string }) {
+type ThemeToggleProps = {
+  className?: string
+  size?: 'default' | 'lg'
+}
+
+export function ThemeToggle({ className, size = 'default' }: ThemeToggleProps) {
   const [dark, setDark] = useState(() =>
     typeof document !== 'undefined'
       ? document.documentElement.classList.contains('dark')
@@ -17,11 +22,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   }, [dark])
 
   return (
-    <motion.div whileTap={{ scale: 0.92 }}>
+    <motion.div whileTap={{ scale: 0.94 }} whileHover={{ scale: 1.03 }}>
       <Button
         variant="outline"
-        size="icon"
-        className={cn('rounded-full', className)}
+        size={size === 'lg' ? 'icon-lg' : 'icon'}
+        className={cn('rounded-xl', className)}
         onClick={() => setDark((value) => !value)}
         aria-label="Toggle theme"
       >
@@ -31,7 +36,11 @@ export function ThemeToggle({ className }: { className?: string }) {
           animate={{ rotate: 0, opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         >
-          {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          {dark ? (
+            <Sun className={size === 'lg' ? 'size-5' : 'size-4'} />
+          ) : (
+            <Moon className={size === 'lg' ? 'size-5' : 'size-4'} />
+          )}
         </motion.span>
       </Button>
     </motion.div>

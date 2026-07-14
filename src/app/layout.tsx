@@ -1,50 +1,20 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import {
-  BarChart3,
-  BookOpen,
-  Calendar,
-  CheckSquare,
-  LayoutDashboard,
-  Menu,
-  NotebookPen,
-  Target,
-  Timer,
-  Trophy,
-} from 'lucide-react'
-import { motion } from 'motion/react'
 
+import { MobileBottomNav } from '@/app/mobile-bottom-nav'
+import { MobileHeader } from '@/app/mobile-header'
+import { NAV_ITEMS } from '@/app/nav-config'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
-import { useUiStore } from '@/store/ui-store'
 import { cn } from '@/lib/utils'
-
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { to: '/goals', label: 'Goals', icon: Target },
-  { to: '/calendar', label: 'Calendar', icon: Calendar },
-  { to: '/notes', label: 'Notes', icon: NotebookPen },
-  { to: '/journal', label: 'Journal', icon: BookOpen },
-  { to: '/pomodoro', label: 'Pomodoro', icon: Timer },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/gamification', label: 'Rewards', icon: Trophy },
-]
 
 export function AppLayout() {
   useKeyboardShortcuts()
-  const sidebarOpen = useUiStore((s) => s.sidebarOpen)
-  const toggleSidebar = useUiStore((s) => s.toggleSidebar)
 
   return (
     <div className="flex min-h-screen bg-background">
-      <motion.aside
-        initial={false}
-        animate={{ width: sidebarOpen ? 240 : 0, opacity: sidebarOpen ? 1 : 0 }}
-        className="hidden shrink-0 overflow-hidden border-r border-border/70 bg-card/50 md:block"
-      >
-        <div className="flex h-full w-60 flex-col p-4">
+      <aside className="hidden w-60 shrink-0 border-r border-border/70 bg-card/50 lg:flex lg:flex-col">
+        <div className="flex h-full flex-col p-4">
           <div className="mb-6 px-2">
             <Badge variant="secondary" className="rounded-full px-3 py-1">
               Personal OS
@@ -72,47 +42,20 @@ export function AppLayout() {
             ))}
           </nav>
         </div>
-      </motion.aside>
+      </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border/70 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="md:hidden"
-              onClick={toggleSidebar}
-              aria-label="Toggle menu"
-            >
-              <Menu className="size-4" />
-            </Button>
-            <span className="text-sm font-medium md:hidden">Personal OS</span>
-          </div>
+      <div className="relative flex min-w-0 flex-1 flex-col max-lg:bg-transparent">
+        <MobileHeader />
+
+        <header className="hidden shrink-0 items-center justify-end border-b border-border/70 px-4 py-3 lg:flex">
           <ThemeToggle />
         </header>
 
-        <main className="flex-1">
+        <main className="flex-1 pb-19 lg:pb-0">
           <Outlet />
         </main>
 
-        <nav className="flex border-t border-border/70 md:hidden">
-          {NAV_ITEMS.slice(0, 5).map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                cn(
-                  'flex flex-1 flex-col items-center gap-1 py-2 text-[10px]',
-                  isActive ? 'text-primary' : 'text-muted-foreground',
-                )
-              }
-            >
-              <item.icon className="size-4" />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        <MobileBottomNav />
       </div>
     </div>
   )
