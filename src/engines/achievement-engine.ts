@@ -7,6 +7,7 @@ import type {
 } from '@/domain/gamification'
 import { calendarEngine } from '@/engines/calendar-engine'
 import { notificationEngine } from '@/engines/notification-engine'
+import { rewardCelebrationEngine } from '@/engines/reward-celebration-engine'
 import { eventRepository } from '@/repositories/event-repository'
 import { gamificationRepository } from '@/repositories/gamification-repository'
 import { goalRepository } from '@/repositories/goal-repository'
@@ -106,6 +107,15 @@ export class AchievementEngine {
         'Achievement unlocked',
         `${unlocked.title} — +${unlocked.xpReward} XP, +${unlocked.coinReward} coins`,
       )
+
+      rewardCelebrationEngine.enqueue({
+        kind: 'achievement',
+        title: unlocked.title,
+        subtitle: unlocked.description,
+        icon: unlocked.icon,
+        xpGain: unlocked.xpReward,
+        coinGain: unlocked.coinReward,
+      })
 
       newlyUnlocked.push(unlocked)
 

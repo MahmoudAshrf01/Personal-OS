@@ -6,6 +6,7 @@ import { MobileHeader } from '@/app/mobile-header'
 import { NAV_ITEMS } from '@/app/nav-config'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Badge } from '@/components/ui/badge'
+import { RewardCelebrationOverlay } from '@/features/reward-celebration/components/reward-celebration-overlay'
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { cn } from '@/lib/utils'
 
@@ -58,6 +59,7 @@ export function AppLayout() {
         </main>
 
         <MobileBottomNav />
+        <RewardCelebrationOverlay />
       </div>
     </div>
   )
