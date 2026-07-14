@@ -4,7 +4,7 @@ import { HeaderProfileStats } from '@/app/header-profile-stats'
 import { MobileBottomNav } from '@/app/mobile-bottom-nav'
 import { MobileHeader } from '@/app/mobile-header'
 import { NAV_ITEMS } from '@/app/nav-config'
-import { ThemeToggle } from '@/components/theme-toggle'
+import { PreferencesControls } from '@/components/preferences-controls'
 import { Badge } from '@/components/ui/badge'
 import { RewardCelebrationOverlay } from '@/features/reward-celebration/components/reward-celebration-overlay'
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
@@ -51,7 +51,7 @@ export function AppLayout() {
 
         <header className="hidden shrink-0 items-center justify-between gap-4 border-b border-border/70 px-4 py-3 lg:flex">
           <HeaderProfileStats />
-          <ThemeToggle />
+          <PreferencesControls />
         </header>
 
         <main className="flex-1 pb-19 lg:pb-0">

@@ -59,6 +59,7 @@ export function appearSoundForKind(kind: RewardKind): SoundName {
 class SoundEngine {
   private howls = new Map<SoundName, Howl>()
   private lastPlayed = new Map<SoundName, number>()
+  private listeners = new Set<() => void>()
   private muted = false
   private ready = false
 
@@ -106,13 +107,20 @@ class SoundEngine {
     return this.muted
   }
 
+  subscribe(listener: () => void) {
+    this.listeners.add(listener)
+    return () => this.listeners.delete(listener)
+  }
+
   setMuted(muted: boolean) {
+    if (this.muted === muted) return
     this.muted = muted
     try {
       localStorage.setItem(MUTE_KEY, muted ? '1' : '0')
     } catch {
       /* ignore */
     }
+    this.listeners.forEach((listener) => listener())
   }
 
   toggleMuted() {
