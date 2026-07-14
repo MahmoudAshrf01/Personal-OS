@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { analyticsEngine, type AnalyticsSummary } from '@/engines/analytics-engine'
 import { gameEngine } from '@/engines/game-engine'
-import { XP_PER_LEVEL } from '@/domain/gamification'
 
 export function DashboardPage() {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null)
@@ -79,7 +78,7 @@ export function DashboardPage() {
               />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              {xpProgress.current} / {XP_PER_LEVEL} XP to next level
+              {xpProgress.current} / {xpProgress.max} XP to next level
             </p>
           </CardContent>
         </Card>

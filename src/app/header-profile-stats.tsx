@@ -2,7 +2,6 @@ import { Coins, Sparkles } from 'lucide-react'
 import { motion, useAnimationControls } from 'motion/react'
 import { useEffect, useRef } from 'react'
 
-import { XP_PER_LEVEL } from '@/domain/gamification'
 import { gameEngine } from '@/engines/game-engine'
 import {
   headerRewardTargets,
@@ -66,7 +65,7 @@ export function HeaderProfileStats({ className }: { className?: string }) {
         data-reward-target="xp"
         animate={xpControls}
         className="flex items-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-2.5 py-1 text-xs font-medium sm:gap-2 sm:text-sm"
-        title={`${xp.current} / ${XP_PER_LEVEL} XP`}
+        title={`${xp.current} / ${xp.max} XP`}
       >
         <div className="hidden h-1.5 w-12 overflow-hidden rounded-full bg-muted sm:block sm:w-16">
           <motion.div
@@ -77,7 +76,7 @@ export function HeaderProfileStats({ className }: { className?: string }) {
           />
         </div>
         <span className="shrink-0 tabular-nums text-muted-foreground">
-          {xp.current}/{XP_PER_LEVEL} XP
+          {xp.current}/{xp.max} XP
         </span>
       </motion.div>
 

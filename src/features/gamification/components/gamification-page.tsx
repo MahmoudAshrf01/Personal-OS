@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { AchievementCategory, AchievementProgress, UserProfile } from '@/domain/gamification'
-import { XP_PER_LEVEL } from '@/domain/gamification'
 import { achievementEngine } from '@/engines/achievement-engine'
 import { gameEngine } from '@/engines/game-engine'
 
@@ -176,7 +175,7 @@ export function GamificationPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            XP — {xp.current} / {XP_PER_LEVEL}
+            XP — {xp.current} / {xp.max}
           </CardTitle>
         </CardHeader>
         <CardContent>

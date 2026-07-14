@@ -1,8 +1,10 @@
 import {
   COINS_TASK_COMPLETE,
-  XP_PER_LEVEL,
   XP_TASK_COMPLETE,
   XP_TASK_CREATE,
+  levelFromXp,
+  totalXpForLevel,
+  xpRequiredForNextLevel,
 } from '@/domain/gamification'
 import { achievementEngine } from '@/engines/achievement-engine'
 import { rewardCelebrationEngine } from '@/engines/reward-celebration-engine'
@@ -104,10 +106,14 @@ export class GameEngine {
   }
 
   getXpProgress(xp: number) {
+    const level = levelFromXp(xp)
+    const floor = totalXpForLevel(level)
+    const max = xpRequiredForNextLevel(level)
+    const current = xp - floor
     return {
-      current: xp % XP_PER_LEVEL,
-      max: XP_PER_LEVEL,
-      percent: ((xp % XP_PER_LEVEL) / XP_PER_LEVEL) * 100,
+      current,
+      max,
+      percent: max > 0 ? (current / max) * 100 : 0,
     }
   }
 }
