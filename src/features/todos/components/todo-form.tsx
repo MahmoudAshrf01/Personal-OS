@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -53,8 +53,7 @@ export function TodoForm({ onSubmit }: TodoFormProps) {
   }
 
   return (
-    <motion.form
-      layout
+    <form
       onSubmit={handleSubmit}
       className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur"
     >
@@ -82,86 +81,95 @@ export function TodoForm({ onSubmit }: TodoFormProps) {
         </div>
       </div>
 
-      {expanded ? (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="mt-4 grid gap-4 md:grid-cols-2"
-        >
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="description">Notes</Label>
-            <Textarea
-              id="description"
-              value={draft.description}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, description: event.target.value }))
-              }
-              placeholder="Add context, links, or acceptance criteria"
-              rows={3}
-            />
-          </div>
+      <AnimatePresence initial={false}>
+        {expanded ? (
+          <motion.div
+            key="details"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="description">Notes</Label>
+                <Textarea
+                  id="description"
+                  value={draft.description}
+                  onChange={(event) =>
+                    setDraft((current) => ({ ...current, description: event.target.value }))
+                  }
+                  placeholder="Add context, links, or acceptance criteria"
+                  rows={3}
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label>Priority</Label>
-            <Select
-              value={draft.priority}
-              onValueChange={(value) =>
-                setDraft((current) => ({ ...current, priority: value as TodoPriority }))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select
+                  value={draft.priority}
+                  onValueChange={(value) =>
+                    setDraft((current) => ({ ...current, priority: value as TodoPriority }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select
-              value={draft.status}
-              onValueChange={(value) =>
-                setDraft((current) => ({ ...current, status: value as TodoStatus }))
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="planned">Planned</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={draft.status}
+                  onValueChange={(value) =>
+                    setDraft((current) => ({ ...current, status: value as TodoStatus }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="dueDate">Due date</Label>
-            <Input
-              id="dueDate"
-              type="date"
-              value={draft.dueDate}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, dueDate: event.target.value }))
-              }
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="dueDate">Due date</Label>
+                <Input
+                  id="dueDate"
+                  type="date"
+                  value={draft.dueDate}
+                  onChange={(event) =>
+                    setDraft((current) => ({ ...current, dueDate: event.target.value }))
+                  }
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
-            <Input
-              id="tags"
-              value={draft.tags}
-              onChange={(event) => setDraft((current) => ({ ...current, tags: event.target.value }))}
-              placeholder="design, backend, urgent"
-            />
-          </div>
-        </motion.div>
-      ) : null}
-    </motion.form>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags</Label>
+                <Input
+                  id="tags"
+                  value={draft.tags}
+                  onChange={(event) =>
+                    setDraft((current) => ({ ...current, tags: event.target.value }))
+                  }
+                  placeholder="design, backend, urgent"
+                />
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </form>
   )
 }
