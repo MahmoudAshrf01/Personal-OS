@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 
+import { HeaderProfileStats } from '@/app/header-profile-stats'
 import { MobileBottomNav } from '@/app/mobile-bottom-nav'
 import { MobileHeader } from '@/app/mobile-header'
 import { NAV_ITEMS } from '@/app/nav-config'
@@ -47,7 +48,8 @@ export function AppLayout() {
       <div className="relative flex min-w-0 flex-1 flex-col max-lg:bg-transparent">
         <MobileHeader />
 
-        <header className="hidden shrink-0 items-center justify-end border-b border-border/70 px-4 py-3 lg:flex">
+        <header className="hidden shrink-0 items-center justify-between gap-4 border-b border-border/70 px-4 py-3 lg:flex">
+          <HeaderProfileStats />
           <ThemeToggle />
         </header>
 
