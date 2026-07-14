@@ -15,7 +15,6 @@ import { selectStats, useTaskStore, useTodoStore } from '@/store/task-store'
 export function TodoApp() {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
 
-  const loadTasks = useTodoStore((state) => state.loadTasks)
   const addTodo = useTodoStore((state) => state.addTodo)
   const updateTodo = useTodoStore((state) => state.updateTask)
   const todos = useTodoStore((state) => state.tasks)
@@ -24,13 +23,12 @@ export function TodoApp() {
   const setSearch = useTodoStore((state) => state.setSearch)
   const setFilter = useTodoStore((state) => state.setFilter)
   const clearCompleted = useTodoStore((state) => state.clearCompleted)
-  const getStats = useTodoStore((state) => state.getStats)
 
   useEffect(() => {
-    loadTasks()
-  }, [loadTasks])
+    void useTaskStore.getState().loadTasks()
+  }, [])
 
-  const stats = useMemo(() => getStats(), [getStats, todos, search, filter])
+  const stats = useMemo(() => selectStats({ tasks: todos }), [todos])
 
   return (
     <div className="bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.12),transparent_32%),linear-gradient(to_bottom,var(--background),color-mix(in_oklch,var(--background),var(--muted)_35%))]">

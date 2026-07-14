@@ -25,7 +25,7 @@ export function TodoListBoard({ onEdit }: TodoListBoardProps) {
   const filter = useTodoStore((state) => state.filter)
 
   const visibleTodos = useMemo(
-    () => selectVisibleTasks({ tasks, search, filter } as Parameters<typeof selectVisibleTasks>[0]),
+    () => selectVisibleTasks({ tasks, search, filter }),
     [tasks, search, filter],
   )
 

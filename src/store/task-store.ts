@@ -37,7 +37,9 @@ const sortTasks = (items: Task[]) =>
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
-export function selectVisibleTasks(state: TaskStore): Task[] {
+export function selectVisibleTasks(
+  state: Pick<TaskStore, 'tasks' | 'search' | 'filter'>,
+): Task[] {
   const { tasks, search, filter } = state
   const query = search.trim().toLowerCase()
   return sortTasks(
@@ -53,7 +55,7 @@ export function selectVisibleTasks(state: TaskStore): Task[] {
   )
 }
 
-export function selectStats(state: TaskStore): TodoStats {
+export function selectStats(state: Pick<TaskStore, 'tasks'>): TodoStats {
   const { tasks } = state
   const today = startOfDay(new Date())
   return {
