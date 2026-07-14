@@ -1,6 +1,7 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
+import { soundEngine } from "@/lib/sounds/sound-engine"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
@@ -44,12 +45,25 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  sound = true,
+  onClick,
+  disabled,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    sound?: boolean
+  }) {
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={disabled}
+      onClick={(event) => {
+        if (sound && variant !== "link" && !disabled) {
+          soundEngine.play("button-click")
+        }
+        onClick?.(event)
+      }}
       {...props}
     />
   )

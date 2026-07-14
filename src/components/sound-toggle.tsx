@@ -18,6 +18,7 @@ export function SoundToggle({ className, grouped = false, size = 'default' }: So
   return (
     <motion.div whileTap={{ scale: 0.94 }} whileHover={{ scale: 1.03 }}>
       <Button
+        sound={false}
         variant={grouped ? 'ghost' : 'outline'}
         size={size === 'lg' ? 'icon-lg' : 'icon'}
         className={cn(grouped ? 'rounded-lg' : 'rounded-xl', className)}

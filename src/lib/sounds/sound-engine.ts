@@ -11,10 +11,13 @@ export type SoundName =
   | 'coin-pop'
   | 'coin-collect'
   | 'reward-unlock'
+  | 'button-click'
+
+type FileSoundName = Exclude<SoundName, 'button-click'>
 
 const MUTE_KEY = 'flow-todo:sound-muted'
 
-const SOURCES: Record<SoundName, string> = {
+const SOURCES: Record<FileSoundName, string> = {
   'task-created': '/sounds/task-created.wav',
   'task-completed': '/sounds/task-completed.wav',
   achievement: '/sounds/achievement.wav',
@@ -25,7 +28,7 @@ const SOURCES: Record<SoundName, string> = {
   'reward-unlock': '/sounds/reward-unlock.wav',
 }
 
-const VOLUMES: Record<SoundName, number> = {
+const VOLUMES: Record<FileSoundName, number> = {
   'task-created': 0.45,
   'task-completed': 0.55,
   achievement: 0.58,
@@ -38,6 +41,7 @@ const VOLUMES: Record<SoundName, number> = {
 
 const DEBOUNCE_MS: Partial<Record<SoundName, number>> = {
   'coin-collect': 80,
+  'button-click': 60,
 }
 
 /** Appear sound per celebration kind */
@@ -57,9 +61,10 @@ export function appearSoundForKind(kind: RewardKind): SoundName {
 }
 
 class SoundEngine {
-  private howls = new Map<SoundName, Howl>()
+  private howls = new Map<FileSoundName, Howl>()
   private lastPlayed = new Map<SoundName, number>()
   private listeners = new Set<() => void>()
+  private audioContext: AudioContext | null = null
   private muted = false
   private ready = false
 
@@ -74,7 +79,7 @@ class SoundEngine {
 
   preload() {
     if (this.ready || typeof window === 'undefined') return
-    for (const [name, src] of Object.entries(SOURCES) as [SoundName, string][]) {
+    for (const [name, src] of Object.entries(SOURCES) as [FileSoundName, string][]) {
       this.howls.set(
         name,
         new Howl({
@@ -89,7 +94,6 @@ class SoundEngine {
 
   play(name: SoundName) {
     if (this.muted) return
-    this.preload()
 
     const debounce = DEBOUNCE_MS[name]
     if (debounce) {
@@ -98,9 +102,45 @@ class SoundEngine {
       this.lastPlayed.set(name, Date.now())
     }
 
+    if (name === 'button-click') {
+      this.playButtonClick()
+      return
+    }
+
+    this.preload()
+
     const howl = this.howls.get(name)
     if (!howl) return
     howl.play()
+  }
+
+  private playButtonClick() {
+    if (typeof window === 'undefined') return
+
+    try {
+      this.audioContext ??= new AudioContext()
+      const ctx = this.audioContext
+      if (ctx.state === 'suspended') void ctx.resume()
+
+      const t = ctx.currentTime
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(920, t)
+      osc.frequency.exponentialRampToValueAtTime(520, t + 0.035)
+
+      gain.gain.setValueAtTime(0.0001, t)
+      gain.gain.linearRampToValueAtTime(0.065, t + 0.004)
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(t)
+      osc.stop(t + 0.055)
+    } catch {
+      /* ignore */
+    }
   }
 
   isMuted() {
