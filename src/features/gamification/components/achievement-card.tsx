@@ -149,26 +149,19 @@ export function AchievementCard({
       <Card
         className={cn(
           'transition-colors',
-          completed
-            ? 'border-emerald-500/40 bg-emerald-500/5'
-            : 'opacity-70',
+          completed ? 'border-emerald-500/40' : 'opacity-70',
         )}
       >
         <CardContent className="flex gap-4 py-4">
           <div
             className={cn(
-              'relative flex size-10 shrink-0 items-center justify-center rounded-full',
+              'flex size-10 shrink-0 items-center justify-center rounded-full',
               completed
                 ? 'bg-emerald-500/20 text-emerald-500'
                 : 'bg-muted text-muted-foreground',
             )}
           >
             <Icon className="size-5" />
-            {completed && (
-              <span className="absolute -right-1 -bottom-1 flex size-4 items-center justify-center rounded-full bg-emerald-500 text-white">
-                <Check className="size-2.5" strokeWidth={3} />
-              </span>
-            )}
           </div>
 
           <div className="min-w-0 flex-1 space-y-2">

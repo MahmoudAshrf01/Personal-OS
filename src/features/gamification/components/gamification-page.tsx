@@ -26,6 +26,13 @@ const CATEGORY_LABELS: Record<AchievementCategory, string> = {
   milestones: 'Milestones',
 }
 
+const STAT_TONES = {
+  level: 'text-emerald-500',
+  coins: 'text-amber-500',
+  streak: 'text-orange-500',
+  completed: 'text-violet-500',
+} as const
+
 type StatusFilter = 'all' | 'completed' | 'locked'
 type SortMode = 'completed-first' | 'progress' | 'category'
 
@@ -107,7 +114,7 @@ export function GamificationPage() {
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
       <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
         <Badge variant="secondary" className="rounded-full px-3 py-1">
-          <Trophy className="mr-1 size-3.5" />
+          <Trophy className="mr-1 size-3.5 text-amber-500" />
           Rewards
         </Badge>
         <h1 className="mt-2 text-2xl font-semibold">Gamification</h1>
@@ -120,7 +127,10 @@ export function GamificationPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Sparkles className="size-4" /> Level
+              <span className={`rounded-full bg-muted p-1.5 ${STAT_TONES.level}`}>
+                <Sparkles className="size-4" />
+              </span>
+              Level
             </CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{profile.level}</CardContent>
@@ -128,7 +138,10 @@ export function GamificationPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Coins className="size-4" /> Coins
+              <span className={`rounded-full bg-muted p-1.5 ${STAT_TONES.coins}`}>
+                <Coins className="size-4" />
+              </span>
+              Coins
             </CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{profile.coins}</CardContent>
@@ -136,7 +149,10 @@ export function GamificationPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Flame className="size-4" /> Streak
+              <span className={`rounded-full bg-muted p-1.5 ${STAT_TONES.streak}`}>
+                <Flame className="size-4" />
+              </span>
+              Streak
             </CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">{profile.streak}d</CardContent>
@@ -144,7 +160,10 @@ export function GamificationPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Trophy className="size-4" /> Completed
+              <span className={`rounded-full bg-muted p-1.5 ${STAT_TONES.completed}`}>
+                <Trophy className="size-4" />
+              </span>
+              Completed
             </CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">
@@ -165,7 +184,7 @@ export function GamificationPage() {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${xp.percent}%` }}
-              className="h-full rounded-full bg-primary"
+              className="h-full rounded-full bg-emerald-500"
             />
           </div>
         </CardContent>
