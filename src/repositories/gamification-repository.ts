@@ -34,9 +34,10 @@ export class GamificationRepository {
     return db.achievements.toArray()
   }
 
+  /** Returns the achievement only when newly unlocked; otherwise undefined. */
   async unlockAchievement(id: string): Promise<Achievement | undefined> {
     const achievement = await db.achievements.get(id)
-    if (!achievement || achievement.unlockedAt) return achievement
+    if (!achievement || achievement.unlockedAt) return undefined
     const updated = { ...achievement, unlockedAt: new Date().toISOString() }
     await db.achievements.put(updated)
     return updated

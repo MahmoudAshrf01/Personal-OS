@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 
+import { ACHIEVEMENT_DEFINITIONS } from '@/domain/achievement-definitions'
 import type {
   Achievement,
   AppEvent,
@@ -49,6 +50,10 @@ export class PersonalOSDatabase extends Dexie {
       timeEntries: 'id, taskId, startedAt',
       profile: 'id',
     })
+
+    this.version(2).stores({
+      achievements: 'id, key, category, unlockedAt',
+    })
   }
 }
 
@@ -67,39 +72,17 @@ export async function initDatabase(): Promise<void> {
     })
   }
 
-  const achievementCount = await db.achievements.count()
-  if (achievementCount === 0) {
-    await db.achievements.bulkAdd([
-      {
-        id: 'first-task',
-        key: 'first_task',
-        title: 'First Step',
-        description: 'Create your first task',
-        icon: 'sparkles',
-        xpReward: 10,
-        coinReward: 5,
-        unlockedAt: null,
-      },
-      {
-        id: 'ten-tasks',
-        key: 'ten_tasks',
-        title: 'Getting Momentum',
-        description: 'Complete 10 tasks',
-        icon: 'zap',
-        xpReward: 50,
-        coinReward: 25,
-        unlockedAt: null,
-      },
-      {
-        id: 'streak-7',
-        key: 'streak_7',
-        title: 'Week Warrior',
-        description: 'Maintain a 7-day streak',
-        icon: 'flame',
-        xpReward: 100,
-        coinReward: 50,
-        unlockedAt: null,
-      },
-    ])
+  for (const def of ACHIEVEMENT_DEFINITIONS) {
+    const existing = await db.achievements.get(def.id)
+    if (!existing) {
+      await db.achievements.add({ ...def, unlockedAt: null })
+      continue
+    }
+
+    // Backfill schema fields without resetting unlockedAt
+    await db.achievements.put({
+      ...def,
+      unlockedAt: existing.unlockedAt,
+    })
   }
 }

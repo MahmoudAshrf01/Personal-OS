@@ -1,27 +1,32 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Plus, Target } from 'lucide-react'
+import { Check, Plus, Target } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import type { Goal } from '@/domain/goal'
-import { goalRepository } from '@/repositories/goal-repository'
+import { goalEngine } from '@/engines/goal-engine'
 
 export function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [title, setTitle] = useState('')
 
-  const load = () => goalRepository.getAll().then(setGoals)
+  const load = () => goalEngine.getAll().then(setGoals)
   useEffect(() => {
     load()
   }, [])
 
   const handleAdd = async () => {
     if (!title.trim()) return
-    await goalRepository.create({ title })
+    await goalEngine.create(title)
     setTitle('')
+    load()
+  }
+
+  const handleComplete = async (id: string) => {
+    await goalEngine.complete(id)
     load()
   }
 
@@ -56,9 +61,26 @@ export function GoalsPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{goal.title}</CardTitle>
+            <Card className={goal.status === 'completed' ? 'border-primary/30' : undefined}>
+              <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+                <div>
+                  <CardTitle className="text-base">{goal.title}</CardTitle>
+                  {goal.status === 'completed' && (
+                    <Badge className="mt-2" variant="secondary">
+                      Completed
+                    </Badge>
+                  )}
+                </div>
+                {goal.status !== 'completed' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleComplete(goal.id)}
+                  >
+                    <Check className="size-4" />
+                    Complete
+                  </Button>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">

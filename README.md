@@ -34,7 +34,7 @@ Flow Todo is a **Personal Operating System** for daily productivity. Data lives 
 
 - **Dashboard** - At-a-glance stats, XP progress, quick navigation
 - **Analytics** - Completion rates, weekly activity, 7-day bar chart
-- **Gamification** - XP, levels, coins, streaks, and unlockable achievements
+- **Gamification** - XP, levels, coins, streaks, and categorized achievements (tasks, focus, consistency, milestones) with progress bars
 
 ### Task capabilities
 

@@ -7,15 +7,36 @@ export interface UserProfile {
   lastActiveDate: string | null
 }
 
+export type AchievementCategory = 'tasks' | 'focus' | 'consistency' | 'milestones'
+
+export type AchievementMetric =
+  | 'tasks_created'
+  | 'tasks_completed'
+  | 'streak_days'
+  | 'pomodoro_sessions'
+  | 'goals_completed'
+  | 'perfect_days'
+  | 'level_reached'
+
 export interface Achievement {
   id: string
   key: string
+  category: AchievementCategory
+  metric: AchievementMetric
+  threshold: number
   title: string
   description: string
   icon: string
   xpReward: number
   coinReward: number
   unlockedAt: string | null
+}
+
+/** Computed view for UI — not stored in Dexie */
+export interface AchievementProgress {
+  achievement: Achievement
+  current: number
+  percent: number
 }
 
 export interface Reward {

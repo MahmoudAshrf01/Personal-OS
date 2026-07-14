@@ -12,7 +12,7 @@
 | `notes` | `id` | `updatedAt`, `archived` |
 | `journalEntries` | `id` | `date`, `createdAt` |
 | `reviews` | `id` | `period`, `createdAt` |
-| `achievements` | `id` | `unlockedAt` |
+| `achievements` | `id` | `key`, `category`, `unlockedAt` |
 | `rewards` | `id` | `claimedAt` |
 | `snapshots` | `id` | `createdAt` |
 | `events` | `id` | `type`, `createdAt` |

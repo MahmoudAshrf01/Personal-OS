@@ -53,7 +53,7 @@ interface Group {
 }
 ```
 
-## Note, Journal, Review, Achievement, Reward, Snapshot, Event
+## Note, Journal, Review, Reward, Snapshot, Event
 
 See `src/domain/` for full definitions. Each entity has `id`, timestamps, and feature-specific fields.
 
@@ -69,3 +69,41 @@ interface UserProfile {
   lastActiveDate: string | null
 }
 ```
+
+## Achievement
+
+```typescript
+type AchievementCategory = 'tasks' | 'focus' | 'consistency' | 'milestones'
+
+type AchievementMetric =
+  | 'tasks_created'
+  | 'tasks_completed'
+  | 'streak_days'
+  | 'pomodoro_sessions'
+  | 'goals_completed'
+  | 'perfect_days'
+  | 'level_reached'
+
+interface Achievement {
+  id: string
+  key: string
+  category: AchievementCategory
+  metric: AchievementMetric
+  threshold: number
+  title: string
+  description: string
+  icon: string
+  xpReward: number
+  coinReward: number
+  unlockedAt: string | null
+}
+
+/** Computed view for UI — not stored in Dexie */
+interface AchievementProgress {
+  achievement: Achievement
+  current: number
+  percent: number
+}
+```
+
+Definitions: `src/domain/achievement-definitions.ts`. Rules: `docs/08-Gamification.md`.

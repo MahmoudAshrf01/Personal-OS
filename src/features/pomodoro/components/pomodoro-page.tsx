@@ -5,6 +5,7 @@ import { Pause, Play, RotateCcw, Timer } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { gameEngine } from '@/engines/game-engine'
 import { eventRepository } from '@/repositories/event-repository'
 
 const DEFAULT_MINUTES = 25
@@ -24,7 +25,9 @@ export function PomodoroPage() {
       setSecondsLeft((s) => {
         if (s <= 1) {
           setRunning(false)
-          eventRepository.create({ type: 'pomodoro_finished', payload: { minutes: DEFAULT_MINUTES } })
+          void eventRepository
+            .create({ type: 'pomodoro_finished', payload: { minutes: DEFAULT_MINUTES } })
+            .then(() => gameEngine.onPomodoroFinished())
           return 0
         }
         return s - 1

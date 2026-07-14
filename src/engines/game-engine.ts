@@ -4,19 +4,17 @@ import {
   XP_TASK_COMPLETE,
   XP_TASK_CREATE,
 } from '@/domain/gamification'
+import { achievementEngine } from '@/engines/achievement-engine'
 import { eventRepository } from '@/repositories/event-repository'
 import { gamificationRepository } from '@/repositories/gamification-repository'
-import { taskRepository } from '@/repositories/task-repository'
 
 export class GameEngine {
   async onTaskCreated(): Promise<void> {
     await gamificationRepository.addXp(XP_TASK_CREATE)
     await gamificationRepository.updateStreak()
-
-    const tasks = await taskRepository.getAll()
-    if (tasks.length === 1) {
-      await this.tryUnlock('first-task')
-    }
+    await achievementEngine.evaluateForMetric('tasks_created')
+    await achievementEngine.evaluateForMetric('streak_days')
+    await achievementEngine.evaluateForMetric('level_reached')
   }
 
   async onTaskCompleted(): Promise<void> {
@@ -33,23 +31,22 @@ export class GameEngine {
       })
     }
 
-    const completed = (await taskRepository.getByStatus('done')).length
-    if (completed >= 10) await this.tryUnlock('ten-tasks')
-
-    const profile = await gamificationRepository.getProfile()
-    if (profile.streak >= 7) await this.tryUnlock('streak-7')
+    await achievementEngine.evaluateForMetric('tasks_completed')
+    await achievementEngine.evaluateForMetric('streak_days')
+    await achievementEngine.evaluateForMetric('perfect_days')
+    await achievementEngine.evaluateForMetric('level_reached')
   }
 
-  private async tryUnlock(achievementId: string): Promise<void> {
-    const unlocked = await gamificationRepository.unlockAchievement(achievementId)
-    if (unlocked?.unlockedAt) {
-      await gamificationRepository.addXp(unlocked.xpReward)
-      await gamificationRepository.addCoins(unlocked.coinReward)
-      await eventRepository.create({
-        type: 'achievement_unlocked',
-        payload: { achievementId, title: unlocked.title },
-      })
-    }
+  async onPomodoroFinished(): Promise<void> {
+    await gamificationRepository.updateStreak()
+    await achievementEngine.evaluateForMetric('pomodoro_sessions')
+    await achievementEngine.evaluateForMetric('streak_days')
+  }
+
+  async onGoalCompleted(): Promise<void> {
+    await gamificationRepository.updateStreak()
+    await achievementEngine.evaluateForMetric('goals_completed')
+    await achievementEngine.evaluateForMetric('streak_days')
   }
 
   async getProfile() {
