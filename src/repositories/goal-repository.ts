@@ -4,17 +4,24 @@ import { db } from '@/database/db'
 import type { Goal, GoalDraft } from '@/domain/goal'
 import type { Repository } from '@/repositories/base-repository'
 
+const normalizeGoal = (goal: Goal): Goal => ({
+  ...goal,
+  steps: [...(goal.steps ?? [])].sort(
+    (left, right) => Number(left.completed) - Number(right.completed),
+  ),
+})
+
 export class GoalRepository implements Repository<Goal, GoalDraft, Partial<Goal>> {
   async getAll(): Promise<Goal[]> {
     const goals = await db.goals.orderBy('createdAt').reverse().toArray()
     return goals
-      .map((goal) => ({ ...goal, steps: goal.steps ?? [] }))
+      .map(normalizeGoal)
       .sort((left, right) => Number(left.status === 'completed') - Number(right.status === 'completed'))
   }
 
   async getById(id: string): Promise<Goal | undefined> {
     const goal = await db.goals.get(id)
-    return goal ? { ...goal, steps: goal.steps ?? [] } : undefined
+    return goal ? normalizeGoal(goal) : undefined
   }
 
   async create(draft: GoalDraft): Promise<Goal> {

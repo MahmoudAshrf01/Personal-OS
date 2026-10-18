@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Check, ListChecks, Plus, Target, X } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ListChecks, Plus, Target, X } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ export function GoalsPage() {
   const [title, setTitle] = useState('')
   const [steps, setSteps] = useState('')
   const [newSteps, setNewSteps] = useState<Record<string, string>>({})
+  const [expandedGoals, setExpandedGoals] = useState<Set<string>>(() => new Set())
 
   const load = () => goalEngine.getAll().then(setGoals)
   useEffect(() => {
@@ -55,6 +56,15 @@ export function GoalsPage() {
   const handleRemoveStep = async (goalId: string, stepId: string) => {
     await goalEngine.removeStep(goalId, stepId)
     load()
+  }
+
+  const toggleExpanded = (goalId: string) => {
+    setExpandedGoals((current) => {
+      const next = new Set(current)
+      if (next.has(goalId)) next.delete(goalId)
+      else next.add(goalId)
+      return next
+    })
   }
 
   return (
@@ -128,7 +138,9 @@ export function GoalsPage() {
               <CardContent className="space-y-4">
                 {goal.steps.length > 0 ? (
                   <div className="space-y-1">
-                    {goal.steps.map((step) => (
+                    {goal.steps
+                      .slice(0, expandedGoals.has(goal.id) ? goal.steps.length : 6)
+                      .map((step) => (
                       <div
                         key={step.id}
                         className="group flex min-h-9 items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/60"
@@ -158,7 +170,28 @@ export function GoalsPage() {
                           </Button>
                         )}
                       </div>
-                    ))}
+                      ))}
+                    {goal.steps.length > 6 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-1 w-full text-muted-foreground"
+                        aria-expanded={expandedGoals.has(goal.id)}
+                        onClick={() => toggleExpanded(goal.id)}
+                      >
+                        {expandedGoals.has(goal.id) ? (
+                          <>
+                            <ChevronUp className="size-4" />
+                            Show less
+                          </>
+                        ) : (
+                          <>
+                            <ChevronDown className="size-4" />
+                            Show all {goal.steps.length} steps
+                          </>
+                        )}
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No steps yet.</p>
