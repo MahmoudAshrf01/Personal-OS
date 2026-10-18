@@ -36,6 +36,7 @@ export function GoalsPage() {
   const [newSteps, setNewSteps] = useState<Record<string, string>>({})
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(() => new Set())
   const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(() => new Set())
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null)
 
   const load = () => goalEngine.getAll().then(setGoals)
@@ -52,6 +53,7 @@ export function GoalsPage() {
     await goalEngine.create(title, stepTitles)
     setTitle('')
     setSteps('')
+    setIsCreateDialogOpen(false)
     load()
   }
 
@@ -121,46 +123,23 @@ export function GoalsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
-      <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-        <Badge variant="secondary" className="rounded-full px-3 py-1">
-          <Target className="mr-1 size-3.5" />
-          Goals
-        </Badge>
-        <h1 className="mt-2 text-2xl font-semibold">Long-term objectives</h1>
+      <motion.header
+        className="sticky top-0 z-30 -mx-4 flex items-center justify-between gap-4 border-b border-border/70 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div>
+          <Badge variant="secondary" className="rounded-full px-3 py-1">
+            <Target className="mr-1 size-3.5" />
+            Goals
+          </Badge>
+          <h1 className="mt-2 text-2xl font-semibold">Long-term objectives</h1>
+        </div>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Plus className="size-4" />
+          Add goal
+        </Button>
       </motion.header>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ListChecks className="size-4 text-primary" />
-            Create a big goal
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Input
-            aria-label="Goal title"
-            placeholder="Goal title, e.g. Learn C++ and OOP"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-          <Textarea
-            aria-label="Goal steps"
-            placeholder={'Add one step per line\nVariables\nFunctions\nClasses and objects'}
-            value={steps}
-            onChange={(event) => setSteps(event.target.value)}
-            rows={5}
-          />
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
-              You can add more steps later and check them off as you progress.
-            </p>
-            <Button onClick={handleAdd} disabled={!title.trim()}>
-              <Plus className="size-4" />
-              Add goal
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="grid gap-3">
         {goals.map((goal, index) => (
@@ -319,6 +298,46 @@ export function GoalsPage() {
           </motion.div>
         ))}
       </div>
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ListChecks className="size-4 text-primary" />
+              Create a big goal
+            </DialogTitle>
+            <DialogDescription>
+              Add the goal title and enter one step per line. You can add more steps later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              autoFocus
+              aria-label="Goal title"
+              placeholder="Goal title, e.g. Learn C++ and OOP"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && handleAdd()}
+            />
+            <Textarea
+              aria-label="Goal steps"
+              placeholder={'Add one step per line\nVariables\nFunctions\nClasses and objects'}
+              value={steps}
+              onChange={(event) => setSteps(event.target.value)}
+              rows={7}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAdd} disabled={!title.trim()}>
+              <Plus className="size-4" />
+              Add goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={goalToDelete !== null}
