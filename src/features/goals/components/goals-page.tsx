@@ -3,7 +3,6 @@ import { motion } from 'motion/react'
 import {
   Check,
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   ListChecks,
   Plus,
@@ -35,7 +34,6 @@ export function GoalsPage() {
   const [steps, setSteps] = useState('')
   const [newSteps, setNewSteps] = useState<Record<string, string>>({})
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(() => new Set())
-  const [collapsedGoals, setCollapsedGoals] = useState<Set<string>>(() => new Set())
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null)
 
@@ -95,25 +93,11 @@ export function GoalsPage() {
       next.delete(goalId)
       return next
     })
-    setCollapsedGoals((current) => {
-      const next = new Set(current)
-      next.delete(goalId)
-      return next
-    })
     load()
   }
 
   const toggleExpanded = (goalId: string) => {
     setExpandedGoals((current) => {
-      const next = new Set(current)
-      if (next.has(goalId)) next.delete(goalId)
-      else next.add(goalId)
-      return next
-    })
-  }
-
-  const toggleGoalCollapsed = (goalId: string) => {
-    setCollapsedGoals((current) => {
       const next = new Set(current)
       if (next.has(goalId)) next.delete(goalId)
       else next.add(goalId)
@@ -153,19 +137,21 @@ export function GoalsPage() {
               <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <Button
-                      size="icon-xs"
-                      variant="ghost"
-                      aria-label={`${collapsedGoals.has(goal.id) ? 'Expand' : 'Collapse'} ${goal.title}`}
-                      aria-expanded={!collapsedGoals.has(goal.id)}
-                      onClick={() => toggleGoalCollapsed(goal.id)}
-                    >
-                      {collapsedGoals.has(goal.id) ? (
-                        <ChevronRight className="size-4" />
-                      ) : (
-                        <ChevronDown className="size-4" />
-                      )}
-                    </Button>
+                    {goal.steps.length > 6 && (
+                      <Button
+                        size="icon-xs"
+                        variant="ghost"
+                        aria-label={`${expandedGoals.has(goal.id) ? 'Hide' : 'Show'} extra steps for ${goal.title}`}
+                        aria-expanded={expandedGoals.has(goal.id)}
+                        onClick={() => toggleExpanded(goal.id)}
+                      >
+                        {expandedGoals.has(goal.id) ? (
+                          <ChevronUp className="size-4" />
+                        ) : (
+                          <ChevronDown className="size-4" />
+                        )}
+                      </Button>
+                    )}
                     <CardTitle className="text-base">{goal.title}</CardTitle>
                   </div>
                   {goal.status === 'completed' && (
@@ -192,7 +178,7 @@ export function GoalsPage() {
                   </Button>
                 </div>
               </CardHeader>
-              {!collapsedGoals.has(goal.id) && <CardContent className="space-y-4">
+              <CardContent className="space-y-4">
                 {goal.steps.length > 0 ? (
                   <div className="space-y-1">
                     {goal.steps
@@ -228,27 +214,6 @@ export function GoalsPage() {
                         )}
                       </div>
                       ))}
-                    {goal.steps.length > 6 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="mt-1 w-full text-muted-foreground"
-                        aria-expanded={expandedGoals.has(goal.id)}
-                        onClick={() => toggleExpanded(goal.id)}
-                      >
-                        {expandedGoals.has(goal.id) ? (
-                          <>
-                            <ChevronUp className="size-4" />
-                            Show less
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="size-4" />
-                            Show all {goal.steps.length} steps
-                          </>
-                        )}
-                      </Button>
-                    )}
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">No steps yet.</p>
@@ -293,7 +258,7 @@ export function GoalsPage() {
                       ` · ${goal.steps.filter((step) => step.completed).length}/${goal.steps.length} steps`}
                   </p>
                 </div>
-              </CardContent>}
+              </CardContent>
             </Card>
           </motion.div>
         ))}
