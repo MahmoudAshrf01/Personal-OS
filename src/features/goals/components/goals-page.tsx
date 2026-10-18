@@ -1,11 +1,28 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Check, ChevronDown, ChevronUp, ListChecks, Plus, Target, X } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  ListChecks,
+  Plus,
+  Target,
+  Trash2,
+  X,
+} from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { Goal } from '@/domain/goal'
@@ -17,6 +34,7 @@ export function GoalsPage() {
   const [steps, setSteps] = useState('')
   const [newSteps, setNewSteps] = useState<Record<string, string>>({})
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(() => new Set())
+  const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null)
 
   const load = () => goalEngine.getAll().then(setGoals)
   useEffect(() => {
@@ -55,6 +73,24 @@ export function GoalsPage() {
 
   const handleRemoveStep = async (goalId: string, stepId: string) => {
     await goalEngine.removeStep(goalId, stepId)
+    load()
+  }
+
+  const handleDeleteGoal = async () => {
+    if (!goalToDelete) return
+    const goalId = goalToDelete.id
+    await goalEngine.delete(goalId)
+    setGoalToDelete(null)
+    setNewSteps((current) => {
+      const next = { ...current }
+      delete next[goalId]
+      return next
+    })
+    setExpandedGoals((current) => {
+      const next = new Set(current)
+      next.delete(goalId)
+      return next
+    })
     load()
   }
 
@@ -128,12 +164,23 @@ export function GoalsPage() {
                     </Badge>
                   )}
                 </div>
-                {goal.status !== 'completed' && (
-                  <Button size="sm" variant="outline" onClick={() => handleComplete(goal.id)}>
-                    <Check className="size-4" />
-                    Complete
+                <div className="flex items-center gap-2">
+                  {goal.status !== 'completed' && (
+                    <Button size="sm" variant="outline" onClick={() => handleComplete(goal.id)}>
+                      <Check className="size-4" />
+                      Complete
+                    </Button>
+                  )}
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-destructive"
+                    aria-label={`Delete ${goal.title}`}
+                    onClick={() => setGoalToDelete(goal)}
+                  >
+                    <Trash2 className="size-4" />
                   </Button>
-                )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {goal.steps.length > 0 ? (
@@ -241,6 +288,29 @@ export function GoalsPage() {
           </motion.div>
         ))}
       </div>
+
+      <Dialog
+        open={goalToDelete !== null}
+        onOpenChange={(open) => !open && setGoalToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete goal?</DialogTitle>
+            <DialogDescription>
+              “{goalToDelete?.title}” and all of its steps will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGoalToDelete(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteGoal}>
+              <Trash2 className="size-4" />
+              Delete goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

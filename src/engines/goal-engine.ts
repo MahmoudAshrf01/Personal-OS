@@ -75,6 +75,10 @@ export class GoalEngine {
     return updated
   }
 
+  async delete(id: string): Promise<void> {
+    await goalRepository.delete(id)
+  }
+
   private async getActiveGoal(id: string): Promise<Goal> {
     const goal = await goalRepository.getById(id)
     if (!goal) throw new Error(`Goal ${id} not found`)
