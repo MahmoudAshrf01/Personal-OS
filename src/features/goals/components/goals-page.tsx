@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Check, Plus, Target } from 'lucide-react'
+import { Check, ListChecks, Plus, Target, X } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import type { Goal } from '@/domain/goal'
 import { goalEngine } from '@/engines/goal-engine'
 
 export function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [title, setTitle] = useState('')
+  const [steps, setSteps] = useState('')
+  const [newSteps, setNewSteps] = useState<Record<string, string>>({})
 
   const load = () => goalEngine.getAll().then(setGoals)
   useEffect(() => {
@@ -20,13 +24,36 @@ export function GoalsPage() {
 
   const handleAdd = async () => {
     if (!title.trim()) return
-    await goalEngine.create(title)
+    const stepTitles = steps
+      .split('\n')
+      .map((step) => step.replace(/^\s*[-*]\s*/, '').trim())
+      .filter(Boolean)
+    await goalEngine.create(title, stepTitles)
     setTitle('')
+    setSteps('')
     load()
   }
 
   const handleComplete = async (id: string) => {
     await goalEngine.complete(id)
+    load()
+  }
+
+  const handleAddStep = async (goalId: string) => {
+    const stepTitle = newSteps[goalId]?.trim()
+    if (!stepTitle) return
+    await goalEngine.addStep(goalId, stepTitle)
+    setNewSteps((current) => ({ ...current, [goalId]: '' }))
+    load()
+  }
+
+  const handleToggleStep = async (goalId: string, stepId: string) => {
+    await goalEngine.toggleStep(goalId, stepId)
+    load()
+  }
+
+  const handleRemoveStep = async (goalId: string, stepId: string) => {
+    await goalEngine.removeStep(goalId, stepId)
     load()
   }
 
@@ -40,26 +67,46 @@ export function GoalsPage() {
         <h1 className="mt-2 text-2xl font-semibold">Long-term objectives</h1>
       </motion.header>
 
-      <div className="flex gap-2">
-        <Input
-          placeholder="New goal…"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-        />
-        <Button onClick={handleAdd}>
-          <Plus className="size-4" />
-          Add
-        </Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ListChecks className="size-4 text-primary" />
+            Create a big goal
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Input
+            aria-label="Goal title"
+            placeholder="Goal title, e.g. Learn C++ and OOP"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+          <Textarea
+            aria-label="Goal steps"
+            placeholder={'Add one step per line\nVariables\nFunctions\nClasses and objects'}
+            value={steps}
+            onChange={(event) => setSteps(event.target.value)}
+            rows={5}
+          />
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              You can add more steps later and check them off as you progress.
+            </p>
+            <Button onClick={handleAdd} disabled={!title.trim()}>
+              <Plus className="size-4" />
+              Add goal
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-3">
-        {goals.map((goal, i) => (
+        {goals.map((goal, index) => (
           <motion.div
             key={goal.id}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
+            transition={{ delay: index * 0.05 }}
           >
             <Card className={goal.status === 'completed' ? 'border-primary/30' : undefined}>
               <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
@@ -72,24 +119,90 @@ export function GoalsPage() {
                   )}
                 </div>
                 {goal.status !== 'completed' && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleComplete(goal.id)}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => handleComplete(goal.id)}>
                     <Check className="size-4" />
                     Complete
                   </Button>
                 )}
               </CardHeader>
-              <CardContent>
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{ width: `${goal.progress}%` }}
-                  />
+              <CardContent className="space-y-4">
+                {goal.steps.length > 0 ? (
+                  <div className="space-y-1">
+                    {goal.steps.map((step) => (
+                      <div
+                        key={step.id}
+                        className="group flex min-h-9 items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/60"
+                      >
+                        <Checkbox
+                          aria-label={`Mark ${step.title} as ${step.completed ? 'not completed' : 'completed'}`}
+                          checked={step.completed}
+                          disabled={goal.status === 'completed'}
+                          onCheckedChange={() => handleToggleStep(goal.id, step.id)}
+                        />
+                        <span
+                          className={`min-w-0 flex-1 ${
+                            step.completed ? 'text-muted-foreground line-through' : ''
+                          }`}
+                        >
+                          {step.title}
+                        </span>
+                        {goal.status !== 'completed' && (
+                          <Button
+                            size="icon-xs"
+                            variant="ghost"
+                            className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                            aria-label={`Remove ${step.title}`}
+                            onClick={() => handleRemoveStep(goal.id, step.id)}
+                          >
+                            <X className="size-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No steps yet.</p>
+                )}
+
+                {goal.status !== 'completed' && (
+                  <div className="flex gap-2">
+                    <Input
+                      aria-label={`Add a step to ${goal.title}`}
+                      placeholder="Add another step…"
+                      value={newSteps[goal.id] ?? ''}
+                      onChange={(event) =>
+                        setNewSteps((current) => ({
+                          ...current,
+                          [goal.id]: event.target.value,
+                        }))
+                      }
+                      onKeyDown={(event) => event.key === 'Enter' && handleAddStep(goal.id)}
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      aria-label={`Add step to ${goal.title}`}
+                      disabled={!newSteps[goal.id]?.trim()}
+                      onClick={() => handleAddStep(goal.id)}
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                  </div>
+                )}
+
+                <div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${goal.progress}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {goal.progress}% complete
+                    {goal.steps.length > 0 &&
+                      ` · ${goal.steps.filter((step) => step.completed).length}/${goal.steps.length} steps`}
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">{goal.progress}% complete</p>
               </CardContent>
             </Card>
           </motion.div>

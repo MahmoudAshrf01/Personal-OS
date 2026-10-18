@@ -6,11 +6,15 @@ import type { Repository } from '@/repositories/base-repository'
 
 export class GoalRepository implements Repository<Goal, GoalDraft, Partial<Goal>> {
   async getAll(): Promise<Goal[]> {
-    return db.goals.orderBy('createdAt').reverse().toArray()
+    const goals = await db.goals.orderBy('createdAt').reverse().toArray()
+    return goals
+      .map((goal) => ({ ...goal, steps: goal.steps ?? [] }))
+      .sort((left, right) => Number(left.status === 'completed') - Number(right.status === 'completed'))
   }
 
   async getById(id: string): Promise<Goal | undefined> {
-    return db.goals.get(id)
+    const goal = await db.goals.get(id)
+    return goal ? { ...goal, steps: goal.steps ?? [] } : undefined
   }
 
   async create(draft: GoalDraft): Promise<Goal> {
@@ -23,6 +27,12 @@ export class GoalRepository implements Repository<Goal, GoalDraft, Partial<Goal>
       targetDate: draft.targetDate ?? null,
       groupId: draft.groupId ?? null,
       progress: draft.progress ?? 0,
+      steps: (draft.steps ?? []).map((title) => ({
+        id: nanoid(),
+        title: title.trim(),
+        completed: false,
+        createdAt: now,
+      })),
       createdAt: now,
       updatedAt: now,
     }
